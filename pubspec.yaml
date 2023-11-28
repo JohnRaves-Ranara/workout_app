@@ -1,0 +1,61 @@
+name: workout_app_idk
+description: A new Flutter project.
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.2 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  provider:
+  hive:
+  hive_flutter:
+  flutter_speed_dial:
+  uuid:
+  expandable_bottom_sheet:
+  percent_indicator:
+  scrollable_positioned_list:
+  flutter_tts: ^3.8.1
+  dropdown_button2:
+  focused_menu:
+  dotted_border:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  hive_generator:
+  build_runner:
+  flutter_lints: ^2.0.0
+  
+  
+
+
+flutter:
+
+  uses-material-design: true
+
+  fonts:
+    - family: mont_bold
+      fonts:
+        - asset: lib/themes/fonts/Mont-Bold.otf
+
+    - family: mont_regular
+      fonts:
+        - asset: lib/themes/fonts/Mont-Regular.otf
+
+
+    - family: mont_heavy
+      fonts:
+        - asset: lib/themes/fonts/Mont-Heavy.otf
+
+    - family: mont_light
+      fonts:
+        - asset: lib/themes/fonts/Mont-Light.otf
+
+    - family: mont_semibold
+      fonts:
+        - asset: lib/themes/fonts/Mont-SemiBold.otf
