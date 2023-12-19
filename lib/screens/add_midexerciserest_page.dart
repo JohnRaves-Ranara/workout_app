@@ -29,7 +29,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
   String selectedTimeType = 'min';
   final midExerciseRestDurationController = TextEditingController();
   WorkoutDataRepository workoutDataRepository = WorkoutDataRepository();
-  int widgetRebuilder = 1;
+  // int widgetRebuilder = 1;
   List<ExerciseListItem> toBeRemoved = [];
 
   @override
@@ -348,7 +348,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
             title: Text(
               'Delete',
               style:
-                  TextStyles.mont_semibold(color: Colors.black, fontSize: 12),
+                  TextStyles.mont_semibold(color: Colors.white, fontSize: 12),
             ),
             onPressed: (() {
               setState(() {
@@ -359,7 +359,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
             trailingIcon: Icon(
               Icons.delete,
               size: 25,
-              color: Colors.black,
+              color: Colors.white,
             )),
       ],
       child: Padding(

@@ -9,9 +9,10 @@ class WorkoutDataRepository {
   Box<Workout> workoutBoxRef = Hive.box('workouts');
   Uuid uuid = Uuid();
 
-  void addExercise(
+  void modifyExerciseList(
       {required String selectedWorkoutKey,
       required String selectedWorkoutName,
+      ExerciseListItem? itemToBeUpdated,
       String? selectedExecutionType,
       String? exerciseName,
       int? set_count,
@@ -24,6 +25,7 @@ class WorkoutDataRepository {
     List<ExerciseListItem>? exerciseList_fromDB =
         selectedWorkoutRef!.exerciseList;
     ExerciseListItem newExerciseListItem;
+
     if (selectedExecutionType == 'Reps') {
       newExerciseListItem = ExerciseListItem()
         ..execution_type = selectedExecutionType //Reps
@@ -43,14 +45,20 @@ class WorkoutDataRepository {
       ..midset_rest_duration_timetype = selectedRestTimeType;
 
     //update exerciseListFromDB with new value
-    exerciseList_fromDB.add(newExerciseListItem);
-
+    if (itemToBeUpdated != null) {
+      //sets the old item to the new, updated item.
+      exerciseList_fromDB[exerciseList_fromDB.indexOf(itemToBeUpdated)] =
+          newExerciseListItem;
+    } else {
+      //adds the new item to the list
+      exerciseList_fromDB.add(newExerciseListItem);
+    }
     Workout newWorkout = Workout()
       ..key = selectedWorkoutKey
       ..name = selectedWorkoutName
       ..exerciseList = exerciseList_fromDB;
 
-    print('add exercise sa repo');
+    //updates the database with the changes
     workoutBoxRef.put(selectedWorkoutKey, newWorkout);
   }
 
@@ -77,6 +85,34 @@ class WorkoutDataRepository {
 
     print('add rest sa repo');
     workoutBoxRef.put(selectedWorkoutKey, newWorkout);
+  }
 
+  void updateMidExerciseRest(
+      {required ExerciseListItem itemToBeUpdated,
+      required String selectedWorkoutKey,
+      required WorkoutProvider workProv,
+      required String durationTimeType,
+      required int duration}) {
+    Workout newWorkout = workoutBoxRef.get(selectedWorkoutKey)!;
+    newWorkout.exerciseList[newWorkout.exerciseList.indexOf(itemToBeUpdated)]
+        .midexercise_rest_duration = duration;
+    newWorkout.exerciseList[newWorkout.exerciseList.indexOf(itemToBeUpdated)]
+        .midexercise_rest_duration_timetype = durationTimeType;
+    workoutBoxRef.put(selectedWorkoutKey, newWorkout);
+  }
+
+  void deleteExerciseListItem({
+    required int itemIndex,
+    required String selectedWorkoutKey,
+    required List<ExerciseListItem> oldExerciseList,
+    required WorkoutProvider workProv,
+  }) {
+    oldExerciseList.removeAt(itemIndex);
+    Workout updatedWorkout = workoutBoxRef.get(selectedWorkoutKey)!;
+    updatedWorkout.exerciseList = oldExerciseList;
+
+    workoutBoxRef.put(selectedWorkoutKey, updatedWorkout);
+
+    print("AFTER REMOVING: \n ${workProv.exerciseListDB}");
   }
 }

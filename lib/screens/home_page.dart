@@ -11,7 +11,7 @@ import 'package:workout_app_idk/providers/workout_provider.dart';
 import 'package:workout_app_idk/screens/play_exercises_page.dart';
 import 'package:workout_app_idk/themes/TextStyles.dart';
 import 'package:workout_app_idk/services/workout_service.dart';
-import 'package:dotted_border/dotted_border.dart';
+import 'package:uuid/uuid.dart';
 
 class home_page extends StatefulWidget {
   const home_page({super.key});
@@ -49,6 +49,11 @@ class _home_pageState extends State<home_page> {
       print("DILI EMPTY ANG DB SINCE THE BEGINNING");
       prov.selectWorkout(workouts[0]);
     }
+
+    print('keys');
+    for (String key in workoutBoxRef.keys) {
+      print(key);
+    }
   }
 
   @override
@@ -64,53 +69,71 @@ class _home_pageState extends State<home_page> {
             borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
         builder: (context) {
           return Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
                 color: lightGray,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
-            height: 400,
             child: ListView.builder(
-              itemCount: workouts.length,
+              shrinkWrap: true,
+              itemCount: workouts.length + 1,
               itemBuilder: (context, index) {
-                return Ink(
-                  height: 65,
-                  child: InkWell(
-                    onTap: (() {
-                      setState(() {
-                        pc.animateToPage(index,
-                            duration: Duration(milliseconds: 200),
-                            curve: Curves.easeIn);
-                      });
-                      Navigator.pop(context);
-                    }),
+                if (index == workouts.length) {
+                  return Container(
+                    decoration: BoxDecoration(
+                        color: green,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(15))),
+                    width: MediaQuery.of(context).size.width,
+                    height: 50,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          workouts[index].name,
-                          style: TextStyles.mont_semibold(color: Colors.white),
+                        Icon(
+                          Icons.add_circle_rounded,
+                          size: 22,
+                          color: Colors.white,
                         ),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              size: 22,
-                              color: Colors.white,
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Icon(
-                              Icons.delete,
-                              size: 22,
-                              color: Colors.white,
-                            )
-                          ],
+                        SizedBox(width: 10),
+                        Text(
+                          'Add Workout Routine',
+                          style: TextStyles.mont_semibold(color: Colors.white),
                         )
                       ],
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  return Ink(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    height: 60,
+                    child: InkWell(
+                      onTap: (() {
+                        setState(() {
+                          pc.animateToPage(index,
+                              duration: Duration(milliseconds: 200),
+                              curve: Curves.easeIn);
+                        });
+                        Navigator.pop(context);
+                      }),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            workouts[index].name,
+                            style:
+                                TextStyles.mont_semibold(color: Colors.white),
+                          ),
+                          (workouts[index] ==
+                                  context
+                                      .read<WorkoutProvider>()
+                                      .selectedWorkout!)
+                              ? 
+                              Icon(Icons.check, color: Colors.white, size: 20)
+                              : SizedBox()
+                        ],
+                      ),
+                    ),
+                  );
+                }
               },
             ),
           );
@@ -124,13 +147,13 @@ class _home_pageState extends State<home_page> {
         context: context,
         builder: (context) {
           return Container(
-            height: 130,
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             // padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
                 color: lightGray,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
-            child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Ink(
                   // color: Color(0xff00c298),
@@ -229,7 +252,8 @@ class _home_pageState extends State<home_page> {
                   )),
               TextButton(
                   onPressed: (() {
-                    Workout newlyAddedWorkout = workProv.addWorkout(workoutNameController.text.trim());
+                    Workout newlyAddedWorkout =
+                        workProv.addWorkout(workoutNameController.text.trim());
                     // pc.animateToPage(workProv.workoutDB.indexOf(newlyAddedWorkout), duration: Duration(milliseconds: 200), curve: Curves.easeIn);
                     workProv.selectWorkout(newlyAddedWorkout);
                     // List<Workout> workouts = workoutBoxRef.values.toList().cast<Workout>();
@@ -239,7 +263,7 @@ class _home_pageState extends State<home_page> {
                       print("dasdasdaszzz");
                       widgetRebuilder = 1;
                     });
-                    
+
                     Navigator.pop(context);
                   }),
                   child: Text(
@@ -261,35 +285,11 @@ class _home_pageState extends State<home_page> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: (() {
-              print(
-                  'LENGTH OF AFTER before DB: ${workoutBoxRef.values.toList().length} ${workoutBoxRef.values.toList()[0].name}');
-              workoutProvider.clearDB();
-              print(workoutProvider.workoutDB);
-
-              print(
-                  'LENGTH OF AFTER CLEARING DB: ${workoutBoxRef.values.toList().length}');
-
-              setState(() {
-                widgetRebuilder = 1;
-              });
-            }),
-            child: Container(
-              height: 50,
-              width: 50,
-              color: Colors.red,
-              child: Icon(
-                Icons.delete,
-                color: Colors.white,
-              ),
-            ),
-          ),
           Ink(
             decoration: BoxDecoration(
                 color: Colors.black, borderRadius: BorderRadius.circular(15)),
             height: 50,
-            width: MediaQuery.of(context).size.width * 0.5,
+            width: MediaQuery.of(context).size.width * 0.72,
             child: InkWell(
               borderRadius: BorderRadius.circular(15),
               onTap: (() {
@@ -315,21 +315,17 @@ class _home_pageState extends State<home_page> {
               ),
             ),
           ),
-          Ink(
-            decoration: BoxDecoration(
-                color: green, borderRadius: BorderRadius.circular(15)),
-            height: 50,
-            width: MediaQuery.of(context).size.width * 0.23,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(15),
-              onTap: (() {
-                addWorkoutDialog(workoutProvider);
-              }),
-              child: Icon(
-                Icons.add,
-                size: 20,
-                color: Colors.black,
-              ),
+          InkWell(
+            onTap: ((){
+              //todo
+            }),
+            borderRadius: BorderRadius.circular(10),
+            child: Ink(
+              decoration: BoxDecoration(
+                  color: Colors.black, borderRadius: BorderRadius.circular(10)),
+              height: 48,
+              width: MediaQuery.of(context).size.width * 0.12,
+              child: Center(child: Icon(Icons.more_vert, color: Colors.white))
             ),
           )
         ],
@@ -409,6 +405,7 @@ class _home_pageState extends State<home_page> {
                     if (currentItem.type == 'Exercise') {
                       if (currentItem.execution_type == 'Duration') {
                         return buildExerciseTile(
+                            exerciseObject: currentItem,
                             exerciseName: currentItem.exerciseName!,
                             set_count: currentItem.set_count!,
                             mid_set_rest: currentItem.midset_rest_duration!,
@@ -420,6 +417,7 @@ class _home_pageState extends State<home_page> {
                                 currentItem.exercise_duration_timetype);
                       } else {
                         return buildExerciseTile(
+                            exerciseObject: currentItem,
                             exerciseName: currentItem.exerciseName!,
                             set_count: currentItem.set_count!,
                             mid_set_rest: currentItem.midset_rest_duration!,
@@ -434,6 +432,7 @@ class _home_pageState extends State<home_page> {
                           print(currentItem.type);
                         }),
                         child: buildMidExerciseRestTile(
+                            midExerciseRestObject: currentItem,
                             duration: currentItem.midexercise_rest_duration!,
                             duration_timetype: currentItem
                                 .midexercise_rest_duration_timetype!),
@@ -451,6 +450,7 @@ class _home_pageState extends State<home_page> {
 
   Widget buildFloatingActionRow() {
     return Container(
+        margin: EdgeInsets.only(bottom: 10),
         alignment: Alignment.center,
         height: 50,
         width: MediaQuery.of(context).size.width * 0.5,
@@ -470,7 +470,7 @@ class _home_pageState extends State<home_page> {
                 width: 70,
                 // color: Colors.blue,
                 child: Icon(
-                  Icons.add_circle,
+                  Icons.add_circle_rounded,
                   size: 20,
                   color: Colors.white,
                 ),
@@ -571,39 +571,94 @@ class _home_pageState extends State<home_page> {
   }
 
   Widget buildMidExerciseRestTile(
-      {required int duration, required String duration_timetype}) {
-    return Padding(
-      padding: EdgeInsets.only(
-          bottom: 14.5,
-          left: MediaQuery.of(context).size.width * 0.06,
-          right: MediaQuery.of(context).size.width * 0.06),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.orange,
-        ),
-        height: 50,
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text(
-                'Mid-Exercise Rest',
-                style: TextStyles.mont_bold(color: Colors.white, fontSize: 12),
-              ),
-              Text('${duration} ${duration_timetype}',
+      {required ExerciseListItem midExerciseRestObject,
+      required int duration,
+      required String duration_timetype}) {
+    WorkoutProvider workProv =
+        Provider.of<WorkoutProvider>(context, listen: false);
+    return FocusedMenuHolder(
+      onPressed: (() {}),
+      menuItems: [
+        FocusedMenuItem(
+            trailingIcon: Icon(
+              Icons.edit,
+              size: 25,
+              color: Colors.white,
+            ),
+            backgroundColor: green,
+            title: Text(
+              'Edit',
+              style:
+                  TextStyles.mont_semibold(color: Colors.white, fontSize: 12),
+            ),
+            onPressed: (() {
+              showUpdateMidExerciseRest(midExerciseRestObject);
+            })),
+        FocusedMenuItem(
+            trailingIcon: Icon(
+              Icons.delete,
+              size: 25,
+              color: Colors.white,
+            ),
+            backgroundColor: Colors.red,
+            title: Text(
+              'Delete',
+              style:
+                  TextStyles.mont_semibold(color: Colors.white, fontSize: 12),
+            ),
+            onPressed: (() {
+              workProv.deleteExerciseListItem(
+                  workProv: workProv,
+                  itemIndex: context
+                      .read<WorkoutProvider>()
+                      .exerciseListDB
+                      .indexOf(midExerciseRestObject),
+                  selectedWorkoutKey: workProv.selectedWorkout!.key,
+                  selectedWorkoutName: workProv.selectedWorkout!.name,
+                  oldExerciseList: workProv.exerciseListDB);
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  PageRouteBuilder(
+                      pageBuilder: (context, animation1, animation2) =>
+                          home_page()),
+                  (route) => false);
+            }))
+      ],
+      child: Padding(
+        padding: EdgeInsets.only(
+            bottom: 14.5,
+            left: MediaQuery.of(context).size.width * 0.06,
+            right: MediaQuery.of(context).size.width * 0.06),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.orange,
+          ),
+          height: 50,
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text(
+                  'Mid-Exercise Rest',
                   style:
-                      TextStyles.mont_bold(color: Colors.white, fontSize: 12)),
-            ],
-          )
-        ]),
+                      TextStyles.mont_bold(color: Colors.white, fontSize: 12),
+                ),
+                Text('${duration} ${duration_timetype}',
+                    style: TextStyles.mont_bold(
+                        color: Colors.white, fontSize: 12)),
+              ],
+            )
+          ]),
+        ),
       ),
     );
   }
 
   Widget buildExerciseTile(
-      {required String exerciseName,
+      {required ExerciseListItem exerciseObject,
+      required String exerciseName,
       required int set_count,
       required int mid_set_rest,
       required String mid_set_rest_timetype,
@@ -611,103 +666,256 @@ class _home_pageState extends State<home_page> {
       int? reps,
       int? duration,
       String? duration_timetype}) {
-    return Container(
-      // color: Colors.yellow,
-      height: MediaQuery.of(context).size.height * 0.17,
-      alignment: Alignment.topCenter,
-      child: Stack(clipBehavior: Clip.none, children: [
-        Positioned(
-          top: 60,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: Colors.black,
+    WorkoutProvider workProv = context.read<WorkoutProvider>();
+    return FocusedMenuHolder(
+      onPressed: (() {}),
+      menuItems: [
+        FocusedMenuItem(
+            trailingIcon: Icon(
+              Icons.edit,
+              size: 25,
+              color: Colors.white,
             ),
-            height: 70,
+            backgroundColor: green,
+            title: Text(
+              'Edit',
+              style:
+                  TextStyles.mont_semibold(color: Colors.white, fontSize: 12),
+            ),
+            onPressed: (() {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => add_exercise_page(
+                            exerciseListItem: exerciseObject,
+                          )));
+            })),
+        FocusedMenuItem(
+            trailingIcon: Icon(
+              Icons.delete,
+              size: 25,
+              color: Colors.white,
+            ),
+            backgroundColor: Colors.red,
+            title: Text(
+              'Delete',
+              style:
+                  TextStyles.mont_semibold(color: Colors.white, fontSize: 12),
+            ),
+            onPressed: (() {
+              workProv.deleteExerciseListItem(
+                  workProv: workProv,
+                  itemIndex: context
+                      .read<WorkoutProvider>()
+                      .exerciseListDB
+                      .indexOf(exerciseObject),
+                  selectedWorkoutKey: workProv.selectedWorkout!.key,
+                  selectedWorkoutName: workProv.selectedWorkout!.name,
+                  oldExerciseList: workProv.exerciseListDB);
+
+              //this is a very dirty fix but it works. Heres the problem and heres how it fixes it:
+              //When I delete an exerciselistitem, the widget tree is not rebuilt
+              //so changes are not reflected.
+              //This code forces the widget tree to rebuilt by navigating to itself. (i use pageroutebuilder to remove push animation)
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  PageRouteBuilder(
+                      pageBuilder: (context, animation1, animation2) =>
+                          home_page()),
+                  (route) => false);
+            }))
+      ],
+      child: Container(
+        // color: Colors.yellow,
+        height: MediaQuery.of(context).size.height * 0.17,
+        alignment: Alignment.topCenter,
+        child: Stack(clipBehavior: Clip.none, children: [
+          Positioned(
+            top: 60,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: Colors.black,
+              ),
+              height: 70,
+              width: MediaQuery.of(context).size.width * 0.88,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 5,
+                          backgroundColor: Colors.orange,
+                        ),
+                        SizedBox(
+                          width: 25,
+                        ),
+                        Text(
+                          '${set_count} sets',
+                          style: TextStyles.mont_regular(
+                              color: Colors.white, fontSize: 12),
+                        ),
+                        SizedBox(
+                          width: 50,
+                        ),
+                        Text(
+                            (execution_type == 'Reps')
+                                ? '${reps} reps'
+                                : '${duration} ${duration_timetype}',
+                            style: TextStyles.mont_regular(
+                                color: Colors.white, fontSize: 12)),
+                      ],
+                    )
+                  ]),
+            ),
+          ),
+          Container(
+            // padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            height: 90,
             width: MediaQuery.of(context).size.width * 0.88,
-            child: Column(
+            decoration: BoxDecoration(
+                color: lighterGray, borderRadius: BorderRadius.circular(15)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: EdgeInsets.only(left: 20, top: 15),
+                  // color: Colors.blue,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${exerciseName}',
+                        style: TextStyles.mont_bold(
+                            color: Colors.white, fontSize: 13),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Text(
+                        'Mid-Set Rest: ${mid_set_rest} ${mid_set_rest_timetype}',
+                        style: TextStyles.mont_regular(
+                            color: Colors.grey, fontSize: 12),
+                      )
+                    ],
+                  ),
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(15),
+                      bottomRight: Radius.circular(15)),
+                  child: Container(
+                    height: 90,
+                    width: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  void showUpdateMidExerciseRest(ExerciseListItem item) {
+    midExerciseRestDurationController.text =
+        item.midexercise_rest_duration.toString();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: lightGray,
+          title: Text(
+            'Add Mid-Exercise Rest',
+            style: TextStyles.mont_bold(color: Colors.white, fontSize: 14),
+          ),
+          content: StatefulBuilder(
+            builder: (context, timetTypeState) {
+              return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        radius: 5,
-                        backgroundColor: Colors.orange,
-                      ),
-                      SizedBox(
-                        width: 25,
-                      ),
-                      Text(
-                        '${set_count} sets',
-                        style: TextStyles.mont_regular(
-                            color: Colors.white, fontSize: 12),
-                      ),
-                      SizedBox(
-                        width: 50,
-                      ),
-                      Text(
-                          (execution_type == 'Reps')
-                              ? '${reps} reps'
-                              : '${duration} ${duration_timetype}',
-                          style: TextStyles.mont_regular(
-                              color: Colors.white, fontSize: 12)),
-                    ],
-                  )
-                ]),
-          ),
-        ),
-        Container(
-          // padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          height: 90,
-          width: MediaQuery.of(context).size.width * 0.88,
-          decoration: BoxDecoration(
-              color: lighterGray, borderRadius: BorderRadius.circular(15)),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: EdgeInsets.only(left: 20, top: 15),
-                // color: Colors.blue,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${exerciseName}',
-                      style: TextStyles.mont_bold(
-                          color: Colors.white, fontSize: 13),
-                    ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Text(
-                      'Mid-Set Rest: ${mid_set_rest} ${mid_set_rest_timetype}',
+                  Flexible(
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      controller: midExerciseRestDurationController,
+                      cursorColor: green,
+                      decoration: InputDecoration(
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: green))),
                       style: TextStyles.mont_regular(
-                          color: Colors.grey, fontSize: 12),
-                    )
-                  ],
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(15),
-                    bottomRight: Radius.circular(15)),
-                child: Container(
-                  height: 90,
-                  width: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
+                          color: Colors.white, fontSize: 14),
+                    ),
                   ),
-                ),
-              )
-            ],
+                  SizedBox(width: 10),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: Colors.grey.shade700, width: 1.3)),
+                    child: DropdownButton<String>(
+                        padding: EdgeInsets.all(10),
+                        dropdownColor: lighterGray,
+                        underline: SizedBox(),
+                        value: selectedTimeType,
+                        onChanged: (newValue) {
+                          timetTypeState(() {
+                            selectedTimeType = newValue!;
+                          });
+                        },
+                        items: timeTypes
+                            .map((timeType) => DropdownMenuItem(
+                                  child: Text(
+                                    timeType,
+                                    style: TextStyles.mont_regular(
+                                        fontSize: 12, color: Colors.white),
+                                  ),
+                                  value: timeType,
+                                ))
+                            .toList()),
+                  ),
+                ],
+              );
+            },
           ),
-        ),
-      ]),
+          actions: [
+            TextButton(
+                onPressed: (() {
+                  Navigator.pop(context);
+                }),
+                child: Text(
+                  'Cancel',
+                  style: TextStyles.mont_bold(color: green),
+                )),
+            TextButton(
+                onPressed: (() {
+                  WorkoutProvider workProv = context.read<WorkoutProvider>();
+                  workProv.updateMidExerciseRest(
+                      itemToBeUpdated: item,
+                      selectedWorkoutKey: workProv.selectedWorkout!.key,
+                      workProv: workProv,
+                      durationTimeType: selectedTimeType,
+                      duration:
+                          int.parse(midExerciseRestDurationController.text));
+
+                  midExerciseRestDurationController.clear();
+                  Navigator.pop(context);
+                }),
+                child: Text(
+                  'Confirm',
+                  style: TextStyles.mont_bold(color: green),
+                )),
+          ],
+        );
+      },
     );
   }
 }

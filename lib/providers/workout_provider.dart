@@ -18,7 +18,8 @@ class WorkoutProvider extends ChangeNotifier {
 
   bool get isExerciseListEmpty => selectedWorkout!.exerciseList.isEmpty;
 
-  List<ExerciseListItem> get exerciseListDB => List.from(selectedWorkout!.exerciseList);
+  List<ExerciseListItem> get exerciseListDB =>
+      List.from(selectedWorkout!.exerciseList);
 
   bool get isworkoutDBEmpty => workoutBoxRef.isEmpty;
 
@@ -42,9 +43,10 @@ class WorkoutProvider extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  void addExercise(
+  void modifyExerciseList(
       {required String selectedWorkoutKey,
       required String selectedWorkoutName,
+      ExerciseListItem? itemToBeUpdated,
       String? selectedExecutionType,
       String? exerciseName,
       int? set_count,
@@ -53,7 +55,8 @@ class WorkoutProvider extends ChangeNotifier {
       int? exerciseDuration,
       int? midSetRestDuration,
       String? selectedRestTimeType}) {
-    workoutDataRepository.addExercise(
+    workoutDataRepository.modifyExerciseList(
+        itemToBeUpdated: itemToBeUpdated,
         selectedWorkoutKey: selectedWorkoutKey,
         selectedWorkoutName: selectedWorkoutName,
         selectedExecutionType: selectedExecutionType,
@@ -80,5 +83,32 @@ class WorkoutProvider extends ChangeNotifier {
         selectedWorkoutName: selectedWorkoutName,
         newExerciseList: newExerciseList);
     print('add rest sa provider');
+  }
+
+  void updateMidExerciseRest(
+      {required ExerciseListItem itemToBeUpdated,
+      required String selectedWorkoutKey,
+      required WorkoutProvider workProv,
+      required String durationTimeType,
+      required int duration}) {
+    workoutDataRepository.updateMidExerciseRest(
+        itemToBeUpdated: itemToBeUpdated,
+        selectedWorkoutKey: selectedWorkoutKey,
+        workProv: workProv,
+        durationTimeType: durationTimeType,
+        duration: duration);
+  }
+
+  void deleteExerciseListItem(
+      {required WorkoutProvider workProv,
+      required int itemIndex,
+      required String selectedWorkoutKey,
+      required String selectedWorkoutName,
+      required List<ExerciseListItem> oldExerciseList}) {
+    workoutDataRepository.deleteExerciseListItem(
+        workProv: workProv,
+        itemIndex: itemIndex,
+        selectedWorkoutKey: selectedWorkoutKey,
+        oldExerciseList: oldExerciseList);
   }
 }

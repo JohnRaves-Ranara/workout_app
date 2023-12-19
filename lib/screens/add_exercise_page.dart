@@ -1,48 +1,87 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:workout_app_idk/providers/workout_provider.dart';
 import '../models/ExerciseListItem.dart';
 import 'package:provider/provider.dart';
-import '../models/Workout_model.dart';
 import 'package:workout_app_idk/services/workout_service.dart';
 import 'package:workout_app_idk/themes/TextStyles.dart';
 
 class add_exercise_page extends StatefulWidget {
-  const add_exercise_page({super.key});
+  ExerciseListItem? exerciseListItem;
+
+  String? selectedWorkoutKey;
+  String? selectedWorkoutName;
+  String? selectedExecutionType;
+  String? exerciseName;
+  int? set_count;
+  int? reps;
+  String? selectedDurationTimeType;
+  int? exerciseDuration;
+  int? midSetRestDuration;
+  String? selectedRestTimeType;
+
+  add_exercise_page(
+      {ExerciseListItem? this.exerciseListItem}
+      );
 
   @override
   State<add_exercise_page> createState() => _add_exercise_pageState();
 }
 
 class _add_exercise_pageState extends State<add_exercise_page> {
-  // late Box<Workout> workoutBoxRef;
   Uuid uuid = Uuid();
   Color green = Color(0xff00c298);
   Color lightGray = Color(0xff222222);
   Color lighterGray = Color.fromARGB(255, 58, 58, 58);
   int widgetRebuilder = 1;
-
-  @override
-  void initState() {
-    super.initState();
-    // workoutBoxRef = Hive.box('workouts');
-  }
-
-  final List<String> executionTypes = ['Reps', 'Duration'];
-  final List<String> timeTypes = ['sec', 'min'];
-
-  String selectedExecutionType = 'Reps';
-  String selectedDurationTimeType = 'sec';
-  String selectedRestTimeType = 'min';
-
+  String? selectedExecutionType = 'Reps';
+  String? selectedDurationTimeType = 'sec';
+  String? selectedRestTimeType = 'min';
   final exerciseNameController = TextEditingController();
   final setsController = TextEditingController();
   final repsController = TextEditingController();
   final exerciseDurationController = TextEditingController();
   final midSetRestDurationController = TextEditingController();
+  final List<String> executionTypes = ['Reps', 'Duration'];
+  final List<String> timeTypes = ['sec', 'min'];
   WorkoutDataRepository workoutDataRepository = WorkoutDataRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    
+    if(widget.exerciseListItem!=null){
+      widget.selectedWorkoutKey = context.read<WorkoutProvider>().selectedWorkout!.key;
+      widget.selectedWorkoutName = context.read<WorkoutProvider>().selectedWorkout!.name;
+      widget.selectedExecutionType = widget.exerciseListItem!.execution_type;
+      widget.exerciseName = widget.exerciseListItem!.exerciseName;
+      widget.set_count = widget.exerciseListItem!.set_count;
+      widget.reps = widget.exerciseListItem!.reps;
+      widget.selectedDurationTimeType = widget.exerciseListItem!.exercise_duration_timetype;
+      widget.exerciseDuration = widget.exerciseListItem!.exercise_duration;
+      widget.midSetRestDuration = widget.exerciseListItem!.midset_rest_duration;
+      widget.selectedRestTimeType = widget.exerciseListItem!.midset_rest_duration_timetype;
+      selectedExecutionType = widget.selectedExecutionType!;
+      selectedRestTimeType = widget.selectedRestTimeType!;
+      exerciseNameController.text = widget.exerciseName!;
+      setsController.text = widget.set_count.toString();
+      midSetRestDurationController.text = widget.midSetRestDuration.toString();
+
+      if(widget.exerciseListItem!.execution_type=='Duration'){
+      selectedDurationTimeType = widget.selectedDurationTimeType;
+      exerciseDurationController.text = widget.exerciseDuration.toString();
+      }
+      else{
+        repsController.text = widget.reps.toString();
+        print("REPS SYA");
+      }
+      
+    }
+    else{
+      print("exercise is null!");
+    }
+  }
 
   @override
   void dispose() {
@@ -59,7 +98,8 @@ class _add_exercise_pageState extends State<add_exercise_page> {
     print(
         'EXERCISELIST BEFORE ADDING: ${context.read<WorkoutProvider>().exerciseListDB}');
     String key = workoutProvider.selectedWorkout!.key;
-    workoutProvider.addExercise(
+    workoutProvider.modifyExerciseList(
+        itemToBeUpdated: (widget.exerciseListItem!=null) ? widget.exerciseListItem : null,
         selectedWorkoutKey: key,
         selectedWorkoutName: workoutProvider.selectedWorkout!.name,
         exerciseName: exerciseNameController.text.trim(),
