@@ -30,23 +30,22 @@ class _home_pageState extends State<home_page> {
   List<ExerciseListItem>? addRestExerciseList;
   List<List<dynamic>> modified = [];
   late List<Workout> workouts;
+  WorkoutDataRepository workoutDataRepo = WorkoutDataRepository();
 
   Color green = Color(0xff00c298);
   Color lightGray = Color(0xff222222);
   Color lighterGray = Color.fromARGB(255, 58, 58, 58);
-  WorkoutDataRepository workoutDataRepository = WorkoutDataRepository();
   int widgetRebuilder = 1;
   PageController pc = PageController();
 
   @override
   void initState() {
     pageIndex = 0;
-    WorkoutProvider prov = Provider.of<WorkoutProvider>(context, listen: false);
+    WorkoutProvider prov = context.read<WorkoutProvider>();
     workoutBoxRef = Hive.box<Workout>('workouts');
     workouts = workoutBoxRef.values.toList();
     //NEED FIX FOR FIRST TIME USER SINCE EMPTY PA ANG DATABASE. CANT SELECT WORKOUT.
-    if (!prov.isworkoutDBEmpty) {
-      print("DILI EMPTY ANG DB SINCE THE BEGINNING");
+    if (!prov.isworkoutDBEmpty && prov.selectedWorkout==null) {
       prov.selectWorkout(workouts[0]);
     }
 
@@ -84,24 +83,33 @@ class _home_pageState extends State<home_page> {
                             BorderRadius.vertical(top: Radius.circular(15))),
                     width: MediaQuery.of(context).size.width,
                     height: 50,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add_circle_rounded,
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          'Add Workout Routine',
-                          style: TextStyles.mont_semibold(color: Colors.white),
-                        )
-                      ],
+                    child: GestureDetector(
+                      onTap: (() {
+                        showAddWorkoutDialog(context.read<WorkoutProvider>());
+                      }),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_circle_rounded,
+                            size: 22,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            'Add Workout Routine',
+                            style:
+                                TextStyles.mont_semibold(color: Colors.white),
+                          )
+                        ],
+                      ),
                     ),
                   );
                 } else {
+                  if (context.read<WorkoutProvider>().selectedWorkout == null) {
+                    print("WALA PAY SELECTED WORKOUT");
+                  }
                   return Ink(
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     height: 60,
@@ -122,12 +130,12 @@ class _home_pageState extends State<home_page> {
                             style:
                                 TextStyles.mont_semibold(color: Colors.white),
                           ),
-                          (workouts[index] ==
+                          (workouts[index].key ==
                                   context
                                       .read<WorkoutProvider>()
-                                      .selectedWorkout!)
-                              ? 
-                              Icon(Icons.check, color: Colors.white, size: 20)
+                                      .selectedWorkout!
+                                      .key)
+                              ? Icon(Icons.check, color: Colors.white, size: 20)
                               : SizedBox()
                         ],
                       ),
@@ -222,7 +230,7 @@ class _home_pageState extends State<home_page> {
     return 'Reps';
   }
 
-  void addWorkoutDialog(WorkoutProvider workProv) {
+  void showAddWorkoutDialog(WorkoutProvider workProv) {
     showDialog(
         context: context,
         builder: (context) {
@@ -253,7 +261,7 @@ class _home_pageState extends State<home_page> {
               TextButton(
                   onPressed: (() {
                     Workout newlyAddedWorkout =
-                        workProv.addWorkout(workoutNameController.text.trim());
+                        workoutDataRepo.addWorkout(workoutNameController.text.trim());
                     // pc.animateToPage(workProv.workoutDB.indexOf(newlyAddedWorkout), duration: Duration(milliseconds: 200), curve: Curves.easeIn);
                     workProv.selectWorkout(newlyAddedWorkout);
                     // List<Workout> workouts = workoutBoxRef.values.toList().cast<Workout>();
@@ -264,7 +272,7 @@ class _home_pageState extends State<home_page> {
                       widgetRebuilder = 1;
                     });
 
-                    Navigator.pop(context);
+                    Navigator.popUntil(context, (route) => route.isFirst);
                   }),
                   child: Text(
                     'Confirm',
@@ -316,17 +324,16 @@ class _home_pageState extends State<home_page> {
             ),
           ),
           InkWell(
-            onTap: ((){
-              //todo
-            }),
+            onTap: (() {}),
             borderRadius: BorderRadius.circular(10),
             child: Ink(
-              decoration: BoxDecoration(
-                  color: Colors.black, borderRadius: BorderRadius.circular(10)),
-              height: 48,
-              width: MediaQuery.of(context).size.width * 0.12,
-              child: Center(child: Icon(Icons.more_vert, color: Colors.white))
-            ),
+                decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(10)),
+                height: 48,
+                width: MediaQuery.of(context).size.width * 0.12,
+                child:
+                    Center(child: Icon(Icons.more_vert, color: Colors.white))),
           )
         ],
       ),
@@ -461,36 +468,44 @@ class _home_pageState extends State<home_page> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            GestureDetector(
-              onTap: (() {
-                showAddExerciseListItemModalSheet();
-              }),
-              child: Container(
-                height: double.infinity,
-                width: 70,
-                // color: Colors.blue,
-                child: Icon(
-                  Icons.add_circle_rounded,
-                  size: 20,
-                  color: Colors.white,
+            Expanded(
+              child: GestureDetector(
+                onTap: (() {
+                  showAddExerciseListItemModalSheet();
+                }),
+                child: Container(
+                  height: double.infinity,
+                  //I DONT FUCKING KNOW WHY
+                  //BUT IF I REMOVE THIS COLOR
+                  //THE EXPANDED DOES NOT SOMEHOW WORK
+                  //AND EVERYWHERE BUT THE ICON IS A DEADZONE.
+                  //WITHOUT THIS YOU AHVE TO FOCUS ON CLICKING THE SMALL FUCKIGN
+                  //ICON.
+                  color: Colors.transparent,
+                  child: Icon(
+                    Icons.add_circle_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: (() {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => play_exercises_page()));
-              }),
-              child: Container(
-                // color: Colors.blue,
-                height: double.infinity,
-                width: 70,
-                child: Icon(
-                  Icons.play_arrow,
-                  size: 20,
-                  color: Colors.white,
+            Expanded(
+              child: GestureDetector(
+                onTap: (() {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => play_exercises_page()));
+                }),
+                child: Container(
+                  color: Colors.transparent,
+                  height: double.infinity,
+                  child: Icon(
+                    Icons.play_arrow,
+                    size: 20,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -517,6 +532,7 @@ class _home_pageState extends State<home_page> {
     return ValueListenableBuilder<Box<Workout>>(
         valueListenable: workoutBoxRef.listenable(),
         builder: (context, box, _) {
+          print("WIDGET BUILD!");
           return SafeArea(
             child: Scaffold(
               backgroundColor: lightGray,
@@ -533,7 +549,7 @@ class _home_pageState extends State<home_page> {
                   return Center(
                       child: GestureDetector(
                     onTap: (() {
-                      addWorkoutDialog(workoutProvider);
+                      showAddWorkoutDialog(workoutProvider);
                     }),
                     child: Container(
                         decoration: BoxDecoration(
@@ -574,8 +590,7 @@ class _home_pageState extends State<home_page> {
       {required ExerciseListItem midExerciseRestObject,
       required int duration,
       required String duration_timetype}) {
-    WorkoutProvider workProv =
-        Provider.of<WorkoutProvider>(context, listen: false);
+    WorkoutProvider workProv = context.read<WorkoutProvider>();
     return FocusedMenuHolder(
       onPressed: (() {}),
       menuItems: [
@@ -607,15 +622,12 @@ class _home_pageState extends State<home_page> {
                   TextStyles.mont_semibold(color: Colors.white, fontSize: 12),
             ),
             onPressed: (() {
-              workProv.deleteExerciseListItem(
-                  workProv: workProv,
+              workoutDataRepo.deleteExerciseListItem(
                   itemIndex: context
                       .read<WorkoutProvider>()
                       .exerciseListDB
                       .indexOf(midExerciseRestObject),
-                  selectedWorkoutKey: workProv.selectedWorkout!.key,
-                  selectedWorkoutName: workProv.selectedWorkout!.name,
-                  oldExerciseList: workProv.exerciseListDB);
+                  selectedWorkoutKey: workProv.selectedWorkout!.key);
               Navigator.pushAndRemoveUntil(
                   context,
                   PageRouteBuilder(
@@ -703,26 +715,12 @@ class _home_pageState extends State<home_page> {
                   TextStyles.mont_semibold(color: Colors.white, fontSize: 12),
             ),
             onPressed: (() {
-              workProv.deleteExerciseListItem(
-                  workProv: workProv,
+              workoutDataRepo.deleteExerciseListItem(
                   itemIndex: context
                       .read<WorkoutProvider>()
                       .exerciseListDB
                       .indexOf(exerciseObject),
-                  selectedWorkoutKey: workProv.selectedWorkout!.key,
-                  selectedWorkoutName: workProv.selectedWorkout!.name,
-                  oldExerciseList: workProv.exerciseListDB);
-
-              //this is a very dirty fix but it works. Heres the problem and heres how it fixes it:
-              //When I delete an exerciselistitem, the widget tree is not rebuilt
-              //so changes are not reflected.
-              //This code forces the widget tree to rebuilt by navigating to itself. (i use pageroutebuilder to remove push animation)
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  PageRouteBuilder(
-                      pageBuilder: (context, animation1, animation2) =>
-                          home_page()),
-                  (route) => false);
+                  selectedWorkoutKey: workProv.selectedWorkout!.key);
             }))
       ],
       child: Container(
@@ -898,7 +896,7 @@ class _home_pageState extends State<home_page> {
             TextButton(
                 onPressed: (() {
                   WorkoutProvider workProv = context.read<WorkoutProvider>();
-                  workProv.updateMidExerciseRest(
+                  workoutDataRepo.updateMidExerciseRest(
                       itemToBeUpdated: item,
                       selectedWorkoutKey: workProv.selectedWorkout!.key,
                       workProv: workProv,

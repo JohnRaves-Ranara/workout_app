@@ -22,7 +22,7 @@ class _add_workout_pageState extends State<add_workout_page> {
   }
 
   final workoutNameController = TextEditingController();
-  WorkoutDataRepository workoutDataRepository = WorkoutDataRepository();
+  WorkoutDataRepository workoutDataRepo = WorkoutDataRepository();
 
   @override
   void dispose() {
@@ -44,7 +44,7 @@ class _add_workout_pageState extends State<add_workout_page> {
                 ),
                 ElevatedButton(
                     onPressed: (() {
-                      workoutProvider
+                      workoutDataRepo
                           .addWorkout(workoutNameController.text.trim());
                       Navigator.pop(context);
                     }),

@@ -28,7 +28,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
   List<String> timeTypes = ['min', 'sec'];
   String selectedTimeType = 'min';
   final midExerciseRestDurationController = TextEditingController();
-  WorkoutDataRepository workoutDataRepository = WorkoutDataRepository();
+  WorkoutDataRepository workoutDataRepo = WorkoutDataRepository();
   // int widgetRebuilder = 1;
   List<ExerciseListItem> toBeRemoved = [];
 
@@ -36,9 +36,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
   void initState() {
     super.initState();
 
-    WorkoutProvider workProv =
-        Provider.of<WorkoutProvider>(context, listen: false);
-    addRestExerciseList = workProv.selectedWorkout!.exerciseList;
+    context.read<WorkoutProvider>().selectedWorkout!.exerciseList;
   }
 
   void printAddRestExerciseList(){
@@ -64,7 +62,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
 
     addRestExerciseList!.removeWhere((item) => toBeRemoved.contains(item));
     List<ExerciseListItem> updatedExerciseList = addRestExerciseList!;
-    workoutProvider.addMidExerciseRest(
+    workoutDataRepo.addMidExerciseRest(
         selectedWorkoutKey: workoutProvider.selectedWorkout!.key,
         selectedWorkoutName: workoutProvider.selectedWorkout!.name,
         newExerciseList: updatedExerciseList);

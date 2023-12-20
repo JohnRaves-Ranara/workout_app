@@ -104,15 +104,11 @@ class WorkoutDataRepository {
   void deleteExerciseListItem({
     required int itemIndex,
     required String selectedWorkoutKey,
-    required List<ExerciseListItem> oldExerciseList,
-    required WorkoutProvider workProv,
   }) {
-    oldExerciseList.removeAt(itemIndex);
+    List<ExerciseListItem> exerciseList = workoutBoxRef.get(selectedWorkoutKey)!.exerciseList;
+    exerciseList.removeAt(itemIndex);
     Workout updatedWorkout = workoutBoxRef.get(selectedWorkoutKey)!;
-    updatedWorkout.exerciseList = oldExerciseList;
-
+    updatedWorkout.exerciseList = exerciseList;
     workoutBoxRef.put(selectedWorkoutKey, updatedWorkout);
-
-    print("AFTER REMOVING: \n ${workProv.exerciseListDB}");
   }
 }

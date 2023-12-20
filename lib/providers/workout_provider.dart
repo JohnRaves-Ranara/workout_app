@@ -43,72 +43,70 @@ class WorkoutProvider extends ChangeNotifier {
   //   notifyListeners();
   // }
 
-  void modifyExerciseList(
-      {required String selectedWorkoutKey,
-      required String selectedWorkoutName,
-      ExerciseListItem? itemToBeUpdated,
-      String? selectedExecutionType,
-      String? exerciseName,
-      int? set_count,
-      int? reps,
-      String? selectedDurationTimeType,
-      int? exerciseDuration,
-      int? midSetRestDuration,
-      String? selectedRestTimeType}) {
-    workoutDataRepository.modifyExerciseList(
-        itemToBeUpdated: itemToBeUpdated,
-        selectedWorkoutKey: selectedWorkoutKey,
-        selectedWorkoutName: selectedWorkoutName,
-        selectedExecutionType: selectedExecutionType,
-        exerciseName: exerciseName,
-        set_count: set_count,
-        reps: reps,
-        selectedDurationTimeType: selectedDurationTimeType,
-        exerciseDuration: exerciseDuration,
-        midSetRestDuration: midSetRestDuration,
-        selectedRestTimeType: selectedRestTimeType);
-    print('add exercise sa provider');
-  }
+  // void modifyExerciseList(
+  //     {required String selectedWorkoutKey,
+  //     required String selectedWorkoutName,
+  //     ExerciseListItem? itemToBeUpdated,
+  //     String? selectedExecutionType,
+  //     String? exerciseName,
+  //     int? set_count,
+  //     int? reps,
+  //     String? selectedDurationTimeType,
+  //     int? exerciseDuration,
+  //     int? midSetRestDuration,
+  //     String? selectedRestTimeType}) {
+  //   workoutDataRepository.modifyExerciseList(
+  //       itemToBeUpdated: itemToBeUpdated,
+  //       selectedWorkoutKey: selectedWorkoutKey,
+  //       selectedWorkoutName: selectedWorkoutName,
+  //       selectedExecutionType: selectedExecutionType,
+  //       exerciseName: exerciseName,
+  //       set_count: set_count,
+  //       reps: reps,
+  //       selectedDurationTimeType: selectedDurationTimeType,
+  //       exerciseDuration: exerciseDuration,
+  //       midSetRestDuration: midSetRestDuration,
+  //       selectedRestTimeType: selectedRestTimeType);
+  //   print('add exercise sa provider');
+  // }
 
-  Workout addWorkout(String workoutName) {
-    return workoutDataRepository.addWorkout(workoutName);
-  }
+  // Workout addWorkout(String workoutName) {
+  //   return workoutDataRepository.addWorkout(workoutName);
+  // }
 
-  void addMidExerciseRest(
-      {required String selectedWorkoutKey,
-      required String selectedWorkoutName,
-      required List<ExerciseListItem> newExerciseList}) {
-    workoutDataRepository.addMidExerciseRest(
-        selectedWorkoutKey: selectedWorkoutKey,
-        selectedWorkoutName: selectedWorkoutName,
-        newExerciseList: newExerciseList);
-    print('add rest sa provider');
-  }
+  // void addMidExerciseRest(
+  //     {required String selectedWorkoutKey,
+  //     required String selectedWorkoutName,
+  //     required List<ExerciseListItem> newExerciseList}) {
+  //   workoutDataRepository.addMidExerciseRest(
+  //       selectedWorkoutKey: selectedWorkoutKey,
+  //       selectedWorkoutName: selectedWorkoutName,
+  //       newExerciseList: newExerciseList);
+  //   print('add rest sa provider');
+  // }
 
-  void updateMidExerciseRest(
-      {required ExerciseListItem itemToBeUpdated,
-      required String selectedWorkoutKey,
-      required WorkoutProvider workProv,
-      required String durationTimeType,
-      required int duration}) {
-    workoutDataRepository.updateMidExerciseRest(
-        itemToBeUpdated: itemToBeUpdated,
-        selectedWorkoutKey: selectedWorkoutKey,
-        workProv: workProv,
-        durationTimeType: durationTimeType,
-        duration: duration);
-  }
+  // void updateMidExerciseRest(
+  //     {required ExerciseListItem itemToBeUpdated,
+  //     required String selectedWorkoutKey,
+  //     required WorkoutProvider workProv,
+  //     required String durationTimeType,
+  //     required int duration}) {
+  //   workoutDataRepository.updateMidExerciseRest(
+  //       itemToBeUpdated: itemToBeUpdated,
+  //       selectedWorkoutKey: selectedWorkoutKey,
+  //       workProv: workProv,
+  //       durationTimeType: durationTimeType,
+  //       duration: duration);
+  // }
 
-  void deleteExerciseListItem(
-      {required WorkoutProvider workProv,
-      required int itemIndex,
-      required String selectedWorkoutKey,
-      required String selectedWorkoutName,
-      required List<ExerciseListItem> oldExerciseList}) {
-    workoutDataRepository.deleteExerciseListItem(
-        workProv: workProv,
-        itemIndex: itemIndex,
-        selectedWorkoutKey: selectedWorkoutKey,
-        oldExerciseList: oldExerciseList);
-  }
+  // void deleteExerciseListItem(
+  //     {required WorkoutProvider workProv,
+  //     required int itemIndex,
+  //     required String selectedWorkoutKey,
+  //     required List<ExerciseListItem> oldExerciseList}) {
+  //   workoutDataRepository.deleteExerciseListItem(
+  //       workProv: workProv,
+  //       itemIndex: itemIndex,
+  //       selectedWorkoutKey: selectedWorkoutKey);
+  // }
 }

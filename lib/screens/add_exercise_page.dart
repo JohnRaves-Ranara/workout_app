@@ -45,7 +45,7 @@ class _add_exercise_pageState extends State<add_exercise_page> {
   final midSetRestDurationController = TextEditingController();
   final List<String> executionTypes = ['Reps', 'Duration'];
   final List<String> timeTypes = ['sec', 'min'];
-  WorkoutDataRepository workoutDataRepository = WorkoutDataRepository();
+  WorkoutDataRepository workoutDataRepo = WorkoutDataRepository();
 
   @override
   void initState() {
@@ -74,7 +74,6 @@ class _add_exercise_pageState extends State<add_exercise_page> {
       }
       else{
         repsController.text = widget.reps.toString();
-        print("REPS SYA");
       }
       
     }
@@ -98,7 +97,7 @@ class _add_exercise_pageState extends State<add_exercise_page> {
     print(
         'EXERCISELIST BEFORE ADDING: ${context.read<WorkoutProvider>().exerciseListDB}');
     String key = workoutProvider.selectedWorkout!.key;
-    workoutProvider.modifyExerciseList(
+    workoutDataRepo.modifyExerciseList(
         itemToBeUpdated: (widget.exerciseListItem!=null) ? widget.exerciseListItem : null,
         selectedWorkoutKey: key,
         selectedWorkoutName: workoutProvider.selectedWorkout!.name,
@@ -154,6 +153,7 @@ class _add_exercise_pageState extends State<add_exercise_page> {
                   child: InkWell(
                     onTap: (() async {
                       addExercise(workoutProvider);
+                      print(workoutProvider.selectedWorkout!.name);
                       Navigator.popUntil(context, (route) => route.isFirst);
                     }),
                     child: Icon(

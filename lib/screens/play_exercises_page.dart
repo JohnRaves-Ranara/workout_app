@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:workout_app_idk/models/ExerciseListItem.dart';
 import 'package:workout_app_idk/models/ExerciseSequenceItem.dart';
 import 'package:workout_app_idk/providers/page_provider.dart';
@@ -7,7 +6,6 @@ import 'package:workout_app_idk/providers/workout_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_app_idk/models/Workout_model.dart';
 import 'dart:async';
-import 'package:expandable_bottom_sheet/expandable_bottom_sheet.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:workout_app_idk/themes/TextStyles.dart';
