@@ -7,6 +7,7 @@ import 'package:workout_app_idk/themes/colors.dart';
 import 'package:workout_app_idk/providers/workout_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_app_idk/screens/home_page.dart';
+import 'package:workout_app_idk/services/workout_service.dart';
 
 class ExerciseTile extends StatelessWidget {
    ExerciseListItem? exerciseObject;
@@ -63,12 +64,9 @@ class ExerciseTile extends StatelessWidget {
                   TextStyles.mont_semibold(color: Colors.white, fontSize: 12),
             ),
             onPressed: (() {
-              workProv.deleteExerciseListItem(
-                  workProv: workProv,
+              WorkoutDataRepository().deleteExerciseListItem(
                   itemIndex: context.read<WorkoutProvider>().exerciseListDB.indexOf(exerciseObject!),
-                  selectedWorkoutKey: workProv.selectedWorkout!.key,
-                  selectedWorkoutName: workProv.selectedWorkout!.name,
-                  oldExerciseList: workProv.exerciseListDB);
+                  selectedWorkoutKey: workProv.selectedWorkout!.key);
 
               //this is a very dirty fix but it works. Heres the problem and heres how it fixes it:
               //When I delete an exerciselistitem, the widget tree is not rebuilt

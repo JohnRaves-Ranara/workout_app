@@ -74,6 +74,15 @@ class WorkoutDataRepository {
     return workout;
   }
 
+  void deleteWorkout(Workout selectedWorkout, WorkoutProvider prov){
+    print("delete repo");
+    workoutBoxRef.delete(selectedWorkout.key);
+    if(!prov.isworkoutDBEmpty){
+      prov.selectWorkout(prov.workoutDB[0]);
+    }
+    print("sdads");
+  }
+
   void addMidExerciseRest(
       {required String selectedWorkoutKey,
       required String selectedWorkoutName,

@@ -20,36 +20,33 @@ class add_midexerciserest_page extends StatefulWidget {
 }
 
 class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
-  // Box<Workout> workoutBoxRef = Hive.box('workouts');
   Color green = Color(0xff00c298);
   Color lightGray = Color(0xff222222);
   Color lighterGray = Color.fromARGB(255, 58, 58, 58);
-  List<ExerciseListItem>? addRestExerciseList;
+  List<ExerciseListItem>? exerciseList;
   List<String> timeTypes = ['min', 'sec'];
   String selectedTimeType = 'min';
   final midExerciseRestDurationController = TextEditingController();
   WorkoutDataRepository workoutDataRepo = WorkoutDataRepository();
-  // int widgetRebuilder = 1;
   List<ExerciseListItem> toBeRemoved = [];
 
   @override
   void initState() {
     super.initState();
-
-    context.read<WorkoutProvider>().selectedWorkout!.exerciseList;
+    exerciseList = context.read<WorkoutProvider>().selectedWorkout!.exerciseList;
   }
 
-  void printAddRestExerciseList(){
+  void printexerciseList(){
     print("-"*10);
-    for(ExerciseListItem i in addRestExerciseList!){
+    for(ExerciseListItem i in exerciseList!){
       print(i.type);
     }
     print("-"*10);
   }
 
   void addMidExerciseRest(WorkoutProvider workoutProvider) {
-    printAddRestExerciseList();
-    for (ExerciseListItem i in addRestExerciseList!) {
+    printexerciseList();
+    for (ExerciseListItem i in exerciseList!) {
       if (i.type == 'AddRestHolder') {
         toBeRemoved.add(i);
       }
@@ -58,10 +55,10 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
       }
     }
 
-    printAddRestExerciseList();
+    printexerciseList();
 
-    addRestExerciseList!.removeWhere((item) => toBeRemoved.contains(item));
-    List<ExerciseListItem> updatedExerciseList = addRestExerciseList!;
+    exerciseList!.removeWhere((item) => toBeRemoved.contains(item));
+    List<ExerciseListItem> updatedExerciseList = exerciseList!;
     workoutDataRepo.addMidExerciseRest(
         selectedWorkoutKey: workoutProvider.selectedWorkout!.key,
         selectedWorkoutName: workoutProvider.selectedWorkout!.name,
@@ -70,14 +67,14 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
 
   void removeHolders() {
     print("RICKY WHEN I CATCH YOU RICKY");
-    printAddRestExerciseList();
-    for (ExerciseListItem i in addRestExerciseList!) {
+    printexerciseList();
+    for (ExerciseListItem i in exerciseList!) {
       if (i.type != 'Exercise') {
         toBeRemoved.add(i);
       }
     }
-    addRestExerciseList!.removeWhere((item) => toBeRemoved.contains(item));
-    printAddRestExerciseList();
+    exerciseList!.removeWhere((item) => toBeRemoved.contains(item));
+    printexerciseList();
   }
 
   @override
@@ -85,9 +82,9 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, child) {
         int indexCounter = 0;
-        while (indexCounter < addRestExerciseList!.length - 1) {
-          if (addRestExerciseList![indexCounter + 1].type == 'Exercise') {
-            addRestExerciseList!.insert(
+        while (indexCounter < exerciseList!.length - 1) {
+          if (exerciseList![indexCounter + 1].type == 'Exercise') {
+            exerciseList!.insert(
                 indexCounter + 1, ExerciseListItem()..type = 'AddRestHolder');
           }
           indexCounter += 2;
@@ -143,10 +140,10 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: addRestExerciseList!.length,
+                    itemCount: exerciseList!.length,
                     itemBuilder: (context, index) {
                       ExerciseListItem currentItem =
-                          addRestExerciseList![index];
+                          exerciseList![index];
                       if (currentItem.type == 'Exercise') {
                         if (currentItem.execution_type == 'Duration') {
                           return buildExerciseTile(
@@ -259,7 +256,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
             TextButton(
                 onPressed: (() {
                   setState(() {
-                    addRestExerciseList![index] = ExerciseListItem()
+                    exerciseList![index] = ExerciseListItem()
                       ..key = Uuid().v4()
                       ..type = 'Mid-Exercise Rest Holder'
                       ..midexercise_rest_duration = int.parse(
@@ -318,7 +315,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
       required int index}) {
     return FocusedMenuHolder(
       onPressed: (() {
-        print(addRestExerciseList![index].type);
+        print(exerciseList![index].type);
       }),
       openWithTap: false,
       menuItems: [
@@ -350,7 +347,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
             ),
             onPressed: (() {
               setState(() {
-                addRestExerciseList![index] = ExerciseListItem()
+                exerciseList![index] = ExerciseListItem()
                   ..type = 'AddRestHolder';
               });
             }),

@@ -11,7 +11,6 @@ import 'package:workout_app_idk/providers/workout_provider.dart';
 import 'package:workout_app_idk/screens/play_exercises_page.dart';
 import 'package:workout_app_idk/themes/TextStyles.dart';
 import 'package:workout_app_idk/services/workout_service.dart';
-import 'package:uuid/uuid.dart';
 
 class home_page extends StatefulWidget {
   const home_page({super.key});
@@ -37,15 +36,18 @@ class _home_pageState extends State<home_page> {
   Color lighterGray = Color.fromARGB(255, 58, 58, 58);
   int widgetRebuilder = 1;
   PageController pc = PageController();
+  List workoutActionsList = [
+    ['Rename routine', Icon(Icons.edit, size: 20, color: Colors.white)],
+    ['Delete routine', Icon(Icons.delete, size: 20, color: Colors.white)]
+  ];
 
   @override
   void initState() {
     pageIndex = 0;
     WorkoutProvider prov = context.read<WorkoutProvider>();
     workoutBoxRef = Hive.box<Workout>('workouts');
-    workouts = workoutBoxRef.values.toList();
-    //NEED FIX FOR FIRST TIME USER SINCE EMPTY PA ANG DATABASE. CANT SELECT WORKOUT.
-    if (!prov.isworkoutDBEmpty && prov.selectedWorkout==null) {
+    workouts = prov.workoutDB;
+    if (!prov.isworkoutDBEmpty) {
       prov.selectWorkout(workouts[0]);
     }
 
@@ -61,29 +63,70 @@ class _home_pageState extends State<home_page> {
     super.dispose();
   }
 
+  showWorkoutActionsModalSheets() {
+    return showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: workoutActionsList.length,
+            itemBuilder: (context, index) {
+              return Ink(
+                  decoration: BoxDecoration(
+                      color: lightGray,
+                      borderRadius: (index == 0)
+                          ? BorderRadius.vertical(top: Radius.circular(15))
+                          : null),
+                  height: 60,
+                  child: InkWell(
+                    onTap: (() {
+                      showDeleteWorkoutConfirmation();
+                    }),
+                    borderRadius: (index == 0)
+                        ? BorderRadius.vertical(top: Radius.circular(15))
+                        : null,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            workoutActionsList[index][0],
+                            style:
+                                TextStyles.mont_semibold(color: Colors.white),
+                          ),
+                          workoutActionsList[index][1]
+                        ],
+                      ),
+                    ),
+                  ));
+            },
+          );
+        });
+  }
+
   showWorkoutListModalSheet(List<Workout> workouts) {
     return showModalBottomSheet(
         context: context,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
         builder: (context) {
-          return Container(
-            decoration: BoxDecoration(
-                color: lightGray,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: workouts.length + 1,
-              itemBuilder: (context, index) {
-                if (index == workouts.length) {
-                  return Container(
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: workouts.length + 1,
+            itemBuilder: (context, index) {
+              if (index == workouts.length) {
+                return Material(
+                  color: lightGray,
+                  child: Ink(
                     decoration: BoxDecoration(
                         color: green,
                         borderRadius:
                             BorderRadius.vertical(top: Radius.circular(15))),
                     width: MediaQuery.of(context).size.width,
                     height: 50,
-                    child: GestureDetector(
+                    child: InkWell(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(15)),
                       onTap: (() {
                         showAddWorkoutDialog(context.read<WorkoutProvider>());
                       }),
@@ -93,7 +136,7 @@ class _home_pageState extends State<home_page> {
                         children: [
                           Icon(
                             Icons.add_circle_rounded,
-                            size: 22,
+                            size: 20,
                             color: Colors.white,
                           ),
                           SizedBox(width: 10),
@@ -105,23 +148,31 @@ class _home_pageState extends State<home_page> {
                         ],
                       ),
                     ),
-                  );
-                } else {
-                  if (context.read<WorkoutProvider>().selectedWorkout == null) {
-                    print("WALA PAY SELECTED WORKOUT");
-                  }
-                  return Ink(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                    height: 60,
-                    child: InkWell(
-                      onTap: (() {
-                        setState(() {
-                          pc.animateToPage(index,
-                              duration: Duration(milliseconds: 200),
-                              curve: Curves.easeIn);
-                        });
-                        Navigator.pop(context);
-                      }),
+                  ),
+                );
+              } else {
+                return Ink(
+                  decoration: BoxDecoration(
+                      color: lightGray,
+                      borderRadius: (index == 0)
+                          ? BorderRadius.vertical(top: Radius.circular(15))
+                          : null),
+                  height: 60,
+                  child: InkWell(
+                    borderRadius: (index == 0)
+                        ? BorderRadius.vertical(top: Radius.circular(15))
+                        : null,
+                    onTap: (() {
+                      setState(() {
+                        pc.animateToPage(index,
+                            duration: Duration(milliseconds: 200),
+                            curve: Curves.easeIn);
+                      });
+                      Navigator.pop(context);
+                    }),
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -140,10 +191,10 @@ class _home_pageState extends State<home_page> {
                         ],
                       ),
                     ),
-                  );
-                }
-              },
-            ),
+                  ),
+                );
+              }
+            },
           );
         });
   }
@@ -154,25 +205,25 @@ class _home_pageState extends State<home_page> {
             borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
         context: context,
         builder: (context) {
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            // padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-                color: lightGray,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Ink(
-                  // color: Color(0xff00c298),
-                  height: 60,
-                  child: InkWell(
-                    onTap: (() {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => add_exercise_page()));
-                    }),
+          return ListView(
+            shrinkWrap: true,
+            children: [
+              Ink(
+                decoration: BoxDecoration(
+                    color: lightGray,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(15))),
+                height: 60,
+                child: InkWell(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                  onTap: (() {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => add_exercise_page()));
+                  }),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -181,27 +232,26 @@ class _home_pageState extends State<home_page> {
                                 color: Colors.white, fontSize: 14)),
                         Icon(
                           Icons.fitness_center,
-                          size: 25,
+                          size: 20,
                           color: Colors.white,
                         )
                       ],
                     ),
                   ),
                 ),
-                GestureDetector(
+              ),
+              Ink(
+                color: lightGray,
+                height: 60,
+                child: InkWell(
                   onTap: (() {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => add_midexerciserest_page()));
-                    // setState(() {
-                    //   isAddingRest = true;
-                    // });
-                    // Navigator.pop(context);
                   }),
-                  child: Container(
-                    // color: Colors.amber,
-                    height: 60,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -210,15 +260,15 @@ class _home_pageState extends State<home_page> {
                                 color: Colors.white, fontSize: 14)),
                         Icon(
                           Icons.access_alarm,
-                          size: 25,
+                          size: 20,
                           color: Colors.white,
                         )
                       ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         });
   }
@@ -260,8 +310,8 @@ class _home_pageState extends State<home_page> {
                   )),
               TextButton(
                   onPressed: (() {
-                    Workout newlyAddedWorkout =
-                        workoutDataRepo.addWorkout(workoutNameController.text.trim());
+                    Workout newlyAddedWorkout = workoutDataRepo
+                        .addWorkout(workoutNameController.text.trim());
                     // pc.animateToPage(workProv.workoutDB.indexOf(newlyAddedWorkout), duration: Duration(milliseconds: 200), curve: Curves.easeIn);
                     workProv.selectWorkout(newlyAddedWorkout);
                     // List<Workout> workouts = workoutBoxRef.values.toList().cast<Workout>();
@@ -324,7 +374,9 @@ class _home_pageState extends State<home_page> {
             ),
           ),
           InkWell(
-            onTap: (() {}),
+            onTap: (() {
+              showWorkoutActionsModalSheets();
+            }),
             borderRadius: BorderRadius.circular(10),
             child: Ink(
                 decoration: BoxDecoration(
@@ -529,9 +581,11 @@ class _home_pageState extends State<home_page> {
   @override
   Widget build(BuildContext context) {
     print("WIDGET BUILD INITIAL");
+
     return ValueListenableBuilder<Box<Workout>>(
         valueListenable: workoutBoxRef.listenable(),
         builder: (context, box, _) {
+          WorkoutProvider prov = context.read<WorkoutProvider>();
           print("WIDGET BUILD!");
           return SafeArea(
             child: Scaffold(
@@ -822,6 +876,47 @@ class _home_pageState extends State<home_page> {
         ]),
       ),
     );
+  }
+
+  showDeleteWorkoutConfirmation() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          // WorkoutProvider workProv = context.read()<WorkoutProvider>();
+          return AlertDialog(
+            backgroundColor: lightGray,
+            title: Text(
+              'Delete Workout Routine',
+              style: TextStyles.mont_bold(color: Colors.white, fontSize: 14),
+            ),
+            content: Text(
+              'Are you sure you want to delete ${context.read<WorkoutProvider>().selectedWorkout!.name}?',
+              style: TextStyles.mont_regular(color: Colors.white, fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: (() {
+                    Navigator.pop(context);
+                  }),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyles.mont_bold(color: green),
+                  )),
+              TextButton(
+                  onPressed: (() {
+                    workoutDataRepo.deleteWorkout(
+                        context.read<WorkoutProvider>().selectedWorkout!,
+                        context.read<WorkoutProvider>()
+                        );
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  }),
+                  child: Text(
+                    'Confirm',
+                    style: TextStyles.mont_bold(color: green),
+                  )),
+            ],
+          );
+        });
   }
 
   void showUpdateMidExerciseRest(ExerciseListItem item) {

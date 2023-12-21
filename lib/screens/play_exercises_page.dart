@@ -201,15 +201,12 @@ class _play_exercises_pageState extends State<play_exercises_page> {
   }
 
   String formatReps(int rep) {
-    if (rep == 1) {
-      return 'Rep';
-    }
-    return 'Reps';
+    if (rep == 1) return 'rep';
+    return 'rep';
   }
 
   void startScrollTimer() {
     page_provider prov = Provider.of<page_provider>(context, listen: false);
-    int page = prov.page!;
     scrollTimer = Timer(Duration(seconds: 1), scrollToCurrent);
   }
 
@@ -235,7 +232,7 @@ class _play_exercises_pageState extends State<play_exercises_page> {
 
   //since entire widget tree cannot be rebuilt when you change
   //a variable (page) in provider (page_provider)
-  //this is a fix for problem: Exercise of execution_type = 'Reps' does not
+  //this is a (dirty) fix for problem: Exercise of execution_type = 'Reps' does not
   //turn blue after proceeding from a timed object (rest or timed exercise)
   //since in order to make it blue you need to rebuild the entire widget tree
   //rest and timed exercise does this by using startTimer(), which sets a new
