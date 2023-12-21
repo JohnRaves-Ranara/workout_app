@@ -34,12 +34,7 @@ class _home_pageState extends State<home_page> {
   Color green = Color(0xff00c298);
   Color lightGray = Color(0xff222222);
   Color lighterGray = Color.fromARGB(255, 58, 58, 58);
-  int widgetRebuilder = 1;
   PageController pc = PageController();
-  List workoutActionsList = [
-    ['Rename routine', Icon(Icons.edit, size: 20, color: Colors.white)],
-    ['Delete routine', Icon(Icons.delete, size: 20, color: Colors.white)]
-  ];
 
   @override
   void initState() {
@@ -47,7 +42,7 @@ class _home_pageState extends State<home_page> {
     WorkoutProvider prov = context.read<WorkoutProvider>();
     workoutBoxRef = Hive.box<Workout>('workouts');
     workouts = prov.workoutDB;
-    if (!prov.isworkoutDBEmpty) {
+    if (!prov.isworkoutDBEmpty && prov.selectedWorkout==null) {
       prov.selectWorkout(workouts[0]);
     }
 
@@ -67,42 +62,54 @@ class _home_pageState extends State<home_page> {
     return showModalBottomSheet(
         context: context,
         builder: (context) {
-          return ListView.builder(
-            shrinkWrap: true,
-            itemCount: workoutActionsList.length,
-            itemBuilder: (context, index) {
-              return Ink(
-                  decoration: BoxDecoration(
-                      color: lightGray,
-                      borderRadius: (index == 0)
-                          ? BorderRadius.vertical(top: Radius.circular(15))
-                          : null),
-                  height: 60,
-                  child: InkWell(
-                    onTap: (() {
-                      showDeleteWorkoutConfirmation();
-                    }),
-                    borderRadius: (index == 0)
-                        ? BorderRadius.vertical(top: Radius.circular(15))
-                        : null,
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            workoutActionsList[index][0],
-                            style:
-                                TextStyles.mont_semibold(color: Colors.white),
-                          ),
-                          workoutActionsList[index][1]
-                        ],
-                      ),
+          return ListView(shrinkWrap: true, children: [
+            Ink(
+                decoration: BoxDecoration(
+                    color: lightGray,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(15))),
+                height: 60,
+                child: InkWell(
+                  onTap: (() {
+                    showAddWorkoutDialog(isUpdate: true);
+                  }),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Rename routine',
+                          style: TextStyles.mont_semibold(color: Colors.white),
+                        ),
+                        Icon(Icons.edit, size: 20, color: Colors.white)
+                      ],
                     ),
-                  ));
-            },
-          );
+                  ),
+                )),
+            Ink(
+                color: lightGray,
+                height: 60,
+                child: InkWell(
+                  onTap: (() {
+                    showDeleteWorkoutConfirmation();
+                  }),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Delete routine',
+                          style: TextStyles.mont_semibold(color: Colors.white),
+                        ),
+                        Icon(Icons.delete, size: 20, color: Colors.white)
+                      ],
+                    ),
+                  ),
+                ))
+          ]);
         });
   }
 
@@ -128,7 +135,7 @@ class _home_pageState extends State<home_page> {
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(15)),
                       onTap: (() {
-                        showAddWorkoutDialog(context.read<WorkoutProvider>());
+                        showAddWorkoutDialog(isUpdate: false);
                       }),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -273,14 +280,9 @@ class _home_pageState extends State<home_page> {
         });
   }
 
-  String formatReps(int rep) {
-    if (rep == 1) {
-      return 'Rep';
-    }
-    return 'Reps';
-  }
-
-  void showAddWorkoutDialog(WorkoutProvider workProv) {
+  void showAddWorkoutDialog({required bool isUpdate}) {
+    WorkoutProvider workProv = context.read<WorkoutProvider>();
+    if(isUpdate) workoutNameController.text = workProv.selectedWorkout!.name;
     showDialog(
         context: context,
         builder: (context) {
@@ -302,6 +304,7 @@ class _home_pageState extends State<home_page> {
             actions: [
               TextButton(
                   onPressed: (() {
+                    workoutNameController.clear();
                     Navigator.pop(context);
                   }),
                   child: Text(
@@ -310,17 +313,15 @@ class _home_pageState extends State<home_page> {
                   )),
               TextButton(
                   onPressed: (() {
-                    Workout newlyAddedWorkout = workoutDataRepo
-                        .addWorkout(workoutNameController.text.trim());
-                    // pc.animateToPage(workProv.workoutDB.indexOf(newlyAddedWorkout), duration: Duration(milliseconds: 200), curve: Curves.easeIn);
-                    workProv.selectWorkout(newlyAddedWorkout);
-                    // List<Workout> workouts = workoutBoxRef.values.toList().cast<Workout>();
-                    // pc.jumpTo(workouts.indexOf(z)+.0);
+                    if (isUpdate) {
+                      workoutDataRepo.updateWorkout(workProv.selectedWorkout!,
+                          workoutNameController.text.trim());
+                    } else {
+                      Workout newlyAddedWorkout = workoutDataRepo
+                          .addWorkout(workoutNameController.text.trim());
+                      workProv.selectWorkout(newlyAddedWorkout);
+                    }
                     workoutNameController.clear();
-                    setState(() {
-                      print("dasdasdaszzz");
-                      widgetRebuilder = 1;
-                    });
 
                     Navigator.popUntil(context, (route) => route.isFirst);
                   }),
@@ -603,7 +604,7 @@ class _home_pageState extends State<home_page> {
                   return Center(
                       child: GestureDetector(
                     onTap: (() {
-                      showAddWorkoutDialog(workoutProvider);
+                      showAddWorkoutDialog(isUpdate: false);
                     }),
                     child: Container(
                         decoration: BoxDecoration(
@@ -630,7 +631,6 @@ class _home_pageState extends State<home_page> {
                   ));
                 } else {
                   print("not empty build");
-                  // workoutProvider.selectWorkout(workoutProvider.selectedWorkout ?? workoutProvider.workoutDB[0]);
                   printExerciseList();
                   return listViewContent(workoutProvider);
                 }
@@ -906,8 +906,7 @@ class _home_pageState extends State<home_page> {
                   onPressed: (() {
                     workoutDataRepo.deleteWorkout(
                         context.read<WorkoutProvider>().selectedWorkout!,
-                        context.read<WorkoutProvider>()
-                        );
+                        context.read<WorkoutProvider>());
                     Navigator.popUntil(context, (route) => route.isFirst);
                   }),
                   child: Text(
@@ -982,6 +981,7 @@ class _home_pageState extends State<home_page> {
           actions: [
             TextButton(
                 onPressed: (() {
+                  midExerciseRestDurationController.clear();
                   Navigator.pop(context);
                 }),
                 child: Text(

@@ -64,7 +64,7 @@ class WorkoutDataRepository {
 
   Workout addWorkout(String workoutName) {
     String key = uuid.v4();
-    final workout = Workout()
+    Workout workout = Workout()
       ..key = key
       ..name = workoutName
       ..exerciseList = [];
@@ -72,6 +72,12 @@ class WorkoutDataRepository {
     workoutBoxRef.put(key, workout);
     print('LENGTH OF DB: ${workoutBoxRef.values.toList().length}');
     return workout;
+  }
+
+  void updateWorkout(Workout workoutToBeUpdated, String newName){
+    Workout updatedWorkout = workoutToBeUpdated;
+    updatedWorkout.name = newName;
+    workoutBoxRef.put(updatedWorkout.key, updatedWorkout);
   }
 
   void deleteWorkout(Workout selectedWorkout, WorkoutProvider prov){
