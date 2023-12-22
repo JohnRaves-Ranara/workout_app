@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -42,7 +43,7 @@ class _home_pageState extends State<home_page> {
     WorkoutProvider prov = context.read<WorkoutProvider>();
     workoutBoxRef = Hive.box<Workout>('workouts');
     workouts = prov.workoutDB;
-    if (!prov.isworkoutDBEmpty && prov.selectedWorkout==null) {
+    if (!prov.isworkoutDBEmpty && prov.selectedWorkout == null) {
       prov.selectWorkout(workouts[0]);
     }
 
@@ -281,8 +282,9 @@ class _home_pageState extends State<home_page> {
   }
 
   void showAddWorkoutDialog({required bool isUpdate}) {
+    final addWorkoutFormKey = GlobalKey<FormState>();
     WorkoutProvider workProv = context.read<WorkoutProvider>();
-    if(isUpdate) workoutNameController.text = workProv.selectedWorkout!.name;
+    if (isUpdate) workoutNameController.text = workProv.selectedWorkout!.name;
     showDialog(
         context: context,
         builder: (context) {
@@ -292,14 +294,27 @@ class _home_pageState extends State<home_page> {
               'Add a Workout Routine',
               style: TextStyles.mont_bold(color: Colors.white, fontSize: 14),
             ),
-            content: TextField(
-              controller: workoutNameController,
-              cursorColor: green,
-              decoration: InputDecoration(
-                  hintText: 'Ex: Leg Day',
-                  focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: green))),
-              style: TextStyles.mont_regular(color: Colors.white, fontSize: 14),
+            content: Form(
+              key: addWorkoutFormKey,
+              child: TextFormField(
+                maxLength: 20,
+                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                validator: (value) {
+                  if (value!.isEmpty)
+                    return "Can't be empty.";
+                  else {
+                    return null;
+                  }
+                },
+                controller: workoutNameController,
+                cursorColor: green,
+                decoration: InputDecoration(
+                    hintText: 'Ex: Leg Day',
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: green))),
+                style:
+                    TextStyles.mont_regular(color: Colors.white, fontSize: 14),
+              ),
             ),
             actions: [
               TextButton(
@@ -313,17 +328,19 @@ class _home_pageState extends State<home_page> {
                   )),
               TextButton(
                   onPressed: (() {
-                    if (isUpdate) {
-                      workoutDataRepo.updateWorkout(workProv.selectedWorkout!,
-                          workoutNameController.text.trim());
-                    } else {
-                      Workout newlyAddedWorkout = workoutDataRepo
-                          .addWorkout(workoutNameController.text.trim());
-                      workProv.selectWorkout(newlyAddedWorkout);
-                    }
-                    workoutNameController.clear();
+                    if (addWorkoutFormKey.currentState!.validate()) {
+                      if (isUpdate) {
+                        workoutDataRepo.updateWorkout(workProv.selectedWorkout!,
+                            workoutNameController.text.trim());
+                      } else {
+                        Workout newlyAddedWorkout = workoutDataRepo
+                            .addWorkout(workoutNameController.text.trim());
+                        workProv.selectWorkout(newlyAddedWorkout);
+                      }
+                      workoutNameController.clear();
 
-                    Navigator.popUntil(context, (route) => route.isFirst);
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                    }
                   }),
                   child: Text(
                     'Confirm',
@@ -919,6 +936,7 @@ class _home_pageState extends State<home_page> {
   }
 
   void showUpdateMidExerciseRest(ExerciseListItem item) {
+    final formKey = GlobalKey<FormState>();
     midExerciseRestDurationController.text =
         item.midexercise_rest_duration.toString();
     showDialog(
@@ -930,53 +948,71 @@ class _home_pageState extends State<home_page> {
             'Add Mid-Exercise Rest',
             style: TextStyles.mont_bold(color: Colors.white, fontSize: 14),
           ),
-          content: StatefulBuilder(
-            builder: (context, timetTypeState) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      controller: midExerciseRestDurationController,
-                      cursorColor: green,
-                      decoration: InputDecoration(
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: green))),
-                      style: TextStyles.mont_regular(
-                          color: Colors.white, fontSize: 14),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                            color: Colors.grey.shade700, width: 1.3)),
-                    child: DropdownButton<String>(
-                        padding: EdgeInsets.all(10),
-                        dropdownColor: lighterGray,
-                        underline: SizedBox(),
-                        value: selectedTimeType,
-                        onChanged: (newValue) {
-                          timetTypeState(() {
-                            selectedTimeType = newValue!;
-                          });
+          content: Form(
+            key: formKey,
+            child: StatefulBuilder(
+              builder: (context, timetTypeState) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: TextFormField(
+                        maxLength: 3,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Can't be empty.";
+                          } else if (!RegExp(r'^[1-9]\d*$').hasMatch(value)) {
+                            return "Positive numbers only.";
+                          } else if (int.parse(value) <= 9 &&
+                              selectedTimeType == 'sec') {
+                            return "Should atleast be 10 sec.";
+                          } else {
+                            return null;
+                          }
                         },
-                        items: timeTypes
-                            .map((timeType) => DropdownMenuItem(
-                                  child: Text(
-                                    timeType,
-                                    style: TextStyles.mont_regular(
-                                        fontSize: 12, color: Colors.white),
-                                  ),
-                                  value: timeType,
-                                ))
-                            .toList()),
-                  ),
-                ],
-              );
-            },
+                        keyboardType: TextInputType.number,
+                        controller: midExerciseRestDurationController,
+                        cursorColor: green,
+                        decoration: InputDecoration(
+                          counterText: '',
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: green))),
+                        style: TextStyles.mont_regular(
+                            color: Colors.white, fontSize: 14),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: Colors.grey.shade700, width: 1.3)),
+                      child: DropdownButton<String>(
+                          padding: EdgeInsets.all(10),
+                          dropdownColor: lighterGray,
+                          underline: SizedBox(),
+                          value: selectedTimeType,
+                          onChanged: (newValue) {
+                            timetTypeState(() {
+                              selectedTimeType = newValue!;
+                            });
+                          },
+                          items: timeTypes
+                              .map((timeType) => DropdownMenuItem(
+                                    child: Text(
+                                      timeType,
+                                      style: TextStyles.mont_regular(
+                                          fontSize: 12, color: Colors.white),
+                                    ),
+                                    value: timeType,
+                                  ))
+                              .toList()),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
           actions: [
             TextButton(
@@ -991,16 +1027,18 @@ class _home_pageState extends State<home_page> {
             TextButton(
                 onPressed: (() {
                   WorkoutProvider workProv = context.read<WorkoutProvider>();
-                  workoutDataRepo.updateMidExerciseRest(
-                      itemToBeUpdated: item,
-                      selectedWorkoutKey: workProv.selectedWorkout!.key,
-                      workProv: workProv,
-                      durationTimeType: selectedTimeType,
-                      duration:
-                          int.parse(midExerciseRestDurationController.text));
+                  if (formKey.currentState!.validate()) {
+                    workoutDataRepo.updateMidExerciseRest(
+                        itemToBeUpdated: item,
+                        selectedWorkoutKey: workProv.selectedWorkout!.key,
+                        workProv: workProv,
+                        durationTimeType: selectedTimeType,
+                        duration:
+                            int.parse(midExerciseRestDurationController.text));
 
-                  midExerciseRestDurationController.clear();
-                  Navigator.pop(context);
+                    midExerciseRestDurationController.clear();
+                    Navigator.pop(context);
+                  }
                 }),
                 child: Text(
                   'Confirm',

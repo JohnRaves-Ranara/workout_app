@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
@@ -29,19 +30,21 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
   final midExerciseRestDurationController = TextEditingController();
   WorkoutDataRepository workoutDataRepo = WorkoutDataRepository();
   List<ExerciseListItem> toBeRemoved = [];
+  GlobalKey formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    exerciseList = context.read<WorkoutProvider>().selectedWorkout!.exerciseList;
+    exerciseList =
+        context.read<WorkoutProvider>().selectedWorkout!.exerciseList;
   }
 
-  void printexerciseList(){
-    print("-"*10);
-    for(ExerciseListItem i in exerciseList!){
+  void printexerciseList() {
+    print("-" * 10);
+    for (ExerciseListItem i in exerciseList!) {
       print(i.type);
     }
-    print("-"*10);
+    print("-" * 10);
   }
 
   void addMidExerciseRest(WorkoutProvider workoutProvider) {
@@ -142,8 +145,7 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
                   child: ListView.builder(
                     itemCount: exerciseList!.length,
                     itemBuilder: (context, index) {
-                      ExerciseListItem currentItem =
-                          exerciseList![index];
+                      ExerciseListItem currentItem = exerciseList![index];
                       if (currentItem.type == 'Exercise') {
                         if (currentItem.execution_type == 'Duration') {
                           return buildExerciseTile(
@@ -187,6 +189,8 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
   }
 
   void showAddRestDialog(int index) {
+    final _formKey = GlobalKey<FormState>(); // Define formKey for validation
+
     showDialog(
       context: context,
       builder: (context) {
@@ -196,57 +200,85 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
             'Add Mid-Exercise Rest',
             style: TextStyles.mont_bold(color: Colors.white, fontSize: 14),
           ),
-          content: StatefulBuilder(
-            builder: (context, timetTypeState) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      controller: midExerciseRestDurationController,
-                      cursorColor: green,
-                      decoration: InputDecoration(
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: green))),
-                      style: TextStyles.mont_regular(
-                          color: Colors.white, fontSize: 14),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                            color: Colors.grey.shade700, width: 1.3)),
-                    child: DropdownButton<String>(
-                        padding: EdgeInsets.all(10),
-                        dropdownColor: lighterGray,
-                        underline: SizedBox(),
-                        value: selectedTimeType,
-                        onChanged: (newValue) {
-                          timetTypeState(() {
-                            selectedTimeType = newValue!;
-                          });
+          content: Form(
+            key: _formKey,
+            child: StatefulBuilder(
+              builder: (context, timetTypeState) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: TextFormField(
+                        maxLength: 3,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                        // validator: (value) {
+                        //   if (value!.isEmpty) {
+                        //     return "Can't be empty.";
+                        //   } else if (!RegExp(r'^(1-9)+\d*$').hasMatch(value)) {
+                        //     return "Positive numbers only.";
+                        //   } else {
+                        //     return null;
+                        //   }
+                        // },
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Can't be empty.";
+                          } else if (!RegExp(r'^[1-9]\d*$').hasMatch(value)) {
+                            return "Positive numbers only.";
+                          } else if (int.parse(value) <= 9 &&
+                              selectedTimeType == 'sec') {
+                            return "Should atleast be 10 sec.";
+                          } else {
+                            return null;
+                          }
                         },
-                        items: timeTypes
-                            .map((timeType) => DropdownMenuItem(
-                                  child: Text(
-                                    timeType,
-                                    style: TextStyles.mont_regular(
-                                        fontSize: 12, color: Colors.white),
-                                  ),
-                                  value: timeType,
-                                ))
-                            .toList()),
-                  ),
-                ],
-              );
-            },
+                        keyboardType: TextInputType.number,
+                        controller: midExerciseRestDurationController,
+                        cursorColor: green,
+                        decoration: InputDecoration(
+                            counterText: '',
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: green))),
+                        style: TextStyles.mont_regular(
+                            color: Colors.white, fontSize: 14),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: Colors.grey.shade700, width: 1.3)),
+                      child: DropdownButton<String>(
+                          padding: EdgeInsets.all(10),
+                          dropdownColor: lighterGray,
+                          underline: SizedBox(),
+                          value: selectedTimeType,
+                          onChanged: (newValue) {
+                            timetTypeState(() {
+                              selectedTimeType = newValue!;
+                            });
+                          },
+                          items: timeTypes
+                              .map((timeType) => DropdownMenuItem(
+                                    child: Text(
+                                      timeType,
+                                      style: TextStyles.mont_regular(
+                                          fontSize: 12, color: Colors.white),
+                                    ),
+                                    value: timeType,
+                                  ))
+                              .toList()),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
           actions: [
             TextButton(
                 onPressed: (() {
+                  midExerciseRestDurationController.clear();
                   Navigator.pop(context);
                 }),
                 child: Text(
@@ -254,19 +286,20 @@ class _add_midexerciserest_pageState extends State<add_midexerciserest_page> {
                   style: TextStyles.mont_bold(color: green),
                 )),
             TextButton(
-                onPressed: (() {
-                  setState(() {
-                    exerciseList![index] = ExerciseListItem()
-                      ..key = Uuid().v4()
-                      ..type = 'Mid-Exercise Rest Holder'
-                      ..midexercise_rest_duration = int.parse(
-                          midExerciseRestDurationController.text.trim())
-                      ..midexercise_rest_duration_timetype = selectedTimeType;
-                  });
-
-                  midExerciseRestDurationController.clear();
-                  Navigator.pop(context);
-                }),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    setState(() {
+                      exerciseList![index] = ExerciseListItem()
+                        ..key = Uuid().v4()
+                        ..type = 'Mid-Exercise Rest Holder'
+                        ..midexercise_rest_duration = int.parse(
+                            midExerciseRestDurationController.text.trim())
+                        ..midexercise_rest_duration_timetype = selectedTimeType;
+                    });
+                    midExerciseRestDurationController.clear();
+                    Navigator.pop(context);
+                  }
+                },
                 child: Text(
                   'Confirm',
                   style: TextStyles.mont_bold(color: green),
