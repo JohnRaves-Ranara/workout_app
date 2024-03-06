@@ -538,6 +538,11 @@ class _home_pageState extends State<home_page> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
+            // Image(
+            //     height: 25,
+            //     width: 25,
+            //     image: NetworkImage(
+            //         'https://i.natgeofe.com/n/548467d8-c5f1-4551-9f58-6817a8d2c45e/NationalGeographic_2572187_3x4.jpg')),
             Expanded(
               child: GestureDetector(
                 onTap: (() {
@@ -975,7 +980,7 @@ class _home_pageState extends State<home_page> {
                         controller: midExerciseRestDurationController,
                         cursorColor: green,
                         decoration: InputDecoration(
-                          counterText: '',
+                            counterText: '',
                             focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: green))),
                         style: TextStyles.mont_regular(
