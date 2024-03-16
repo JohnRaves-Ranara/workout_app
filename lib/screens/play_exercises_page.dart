@@ -219,16 +219,16 @@ class _play_exercises_pageState extends State<play_exercises_page> {
     await FlutterTts().speak(text);
   }
 
-  // void toggleMute() {
-  //   setState(() {
-  //     isMuted = !isMuted;
-  //     if (isMuted) {
-  //       FlutterTts().setVolume(0.0); // Mute TTS
-  //     } else {
-  //       FlutterTts().setVolume(1.0); // Unmute TTS
-  //     }
-  //   });
-  // }
+  void toggleMute() {
+    setState(() {
+      isMuted = !isMuted;
+      if (isMuted) {
+        FlutterTts().setVolume(0.0); // Mute TTS
+      } else {
+        FlutterTts().setVolume(1.0); // Unmute TTS
+      }
+    });
+  }
 
   //since entire widget tree cannot be rebuilt when you change
   //a variable (page) in provider (page_provider)
@@ -262,19 +262,19 @@ class _play_exercises_pageState extends State<play_exercises_page> {
                   actions: [
                     GestureDetector(
                       onTap: ((){
-                        // toggleMute();
+                        toggleMute();
                       }),
                       child: Container(
                         height: double.infinity,
                         padding: EdgeInsets.only(right: 15),
                         child: 
-                        // (!isMuted)
-                        //     ? Icon(
-                        //         Icons.volume_up,
-                        //         size: 25,
-                        //         color: Colors.white,
-                        //       )
-                        //     : 
+                        (!isMuted)
+                            ? Icon(
+                                Icons.volume_up,
+                                size: 25,
+                                color: Colors.white,
+                              )
+                            : 
                             Icon(
                                 Icons.volume_off_rounded,
                                 size: 25,
@@ -338,7 +338,7 @@ class _play_exercises_pageState extends State<play_exercises_page> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Container(
-                        padding: EdgeInsets.all(20),
+                        padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                             color: Colors.grey[900],
                             borderRadius: BorderRadius.circular(15)),
@@ -732,22 +732,22 @@ class _play_exercises_pageState extends State<play_exercises_page> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              height: 50,
-              width: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                color: Colors.grey.shade900,
-              ),
-              child: Icon(
-                Icons.close,
-                size: 30,
-                color: Colors.red,
-              ),
-            ),
-            SizedBox(
-              width: 20,
-            ),
+            // Container(
+            //   height: 50,
+            //   width: 100,
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(25),
+            //     color: Colors.grey.shade900,
+            //   ),
+            //   child: Icon(
+            //     Icons.close,
+            //     size: 30, 
+            //     color: Colors.red,
+            //   ),
+            // ),
+            // SizedBox(
+            //   width: 20,
+            // ),
             GestureDetector(
               onTap: (() async {
                 int currentPage = pageProvider.page!;
@@ -773,36 +773,21 @@ class _play_exercises_pageState extends State<play_exercises_page> {
       );
     } else {
       return Container(
+        margin: EdgeInsets.symmetric(horizontal: 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              height: 50,
-              width: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                color: Colors.grey.shade900,
-              ),
-              child: Icon(
-                Icons.close,
-                size: 30,
-                color: Colors.red,
-              ),
-            ),
-            SizedBox(
-              width: 20,
-            ),
             (isRunning)
                 ? Ink(
-                    height: 70,
-                    width: 120,
+                    height: 50,
+                    width: 80,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(45),
+                      borderRadius: BorderRadius.circular(25),
                       color: Colors.grey.shade800,
                     ),
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(45),
+                      borderRadius: BorderRadius.circular(25),
                       onTap: (() {
                         timer!.cancel();
                         setState(() {
@@ -816,14 +801,14 @@ class _play_exercises_pageState extends State<play_exercises_page> {
                       ),
                     ))
                 : Ink(
-                    height: 70,
-                    width: 120,
+                    height: 50,
+                    width: 80,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(45),
+                      borderRadius: BorderRadius.circular(25),
                       color: Colors.grey.shade800,
                     ),
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(45),
+                      borderRadius: BorderRadius.circular(25),
                       onTap: (() {
                         startTimer(pageProvider, pageProvider.page!);
                         setState(() {

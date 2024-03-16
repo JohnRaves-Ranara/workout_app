@@ -474,7 +474,10 @@ class _home_pageState extends State<home_page> {
                 );
               } else {
                 Workout currentWorkout = workouts1[index];
-                return ListView.builder(
+                return ListView.separated(
+                  separatorBuilder: (context, index) => SizedBox(
+                    height: 12,
+                  ),
                   itemCount: currentWorkout.exerciseList.length,
                   itemBuilder: (context, index) {
                     ExerciseListItem currentItem =
@@ -532,6 +535,14 @@ class _home_pageState extends State<home_page> {
         height: 50,
         width: MediaQuery.of(context).size.width * 0.5,
         decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: green.withOpacity(0.7),
+              offset: Offset(0, 0),
+              blurRadius: 18,
+              spreadRadius: -3,
+            ),
+          ],
           color: green,
           borderRadius: BorderRadius.circular(45),
         ),
@@ -556,7 +567,7 @@ class _home_pageState extends State<home_page> {
                   //AND EVERYWHERE BUT THE ICON IS A DEADZONE.
                   //WITHOUT THIS YOU AHVE TO FOCUS ON CLICKING THE SMALL FUCKIGN
                   //ICON.
-                  color: Colors.transparent,
+                  // color: Colors.transparent,
                   child: Icon(
                     Icons.add_circle_rounded,
                     size: 20,
@@ -712,34 +723,27 @@ class _home_pageState extends State<home_page> {
                   (route) => false);
             }))
       ],
-      child: Padding(
-        padding: EdgeInsets.only(
-            bottom: 14.5,
-            left: MediaQuery.of(context).size.width * 0.06,
-            right: MediaQuery.of(context).size.width * 0.06),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.orange,
-          ),
-          height: 50,
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Text(
-                  'Mid-Exercise Rest',
-                  style:
-                      TextStyles.mont_bold(color: Colors.white, fontSize: 12),
-                ),
-                Text('${duration} ${duration_timetype}',
-                    style: TextStyles.mont_bold(
-                        color: Colors.white, fontSize: 12)),
-              ],
-            )
-          ]),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.orange,
         ),
+        height: 50,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                'Mid-Exercise Rest',
+                style: TextStyles.mont_bold(color: Colors.white, fontSize: 12),
+              ),
+              Text('${duration} ${duration_timetype}',
+                  style:
+                      TextStyles.mont_bold(color: Colors.white, fontSize: 12)),
+            ],
+          )
+        ]),
       ),
     );
   }
@@ -800,102 +804,96 @@ class _home_pageState extends State<home_page> {
             }))
       ],
       child: Container(
-        // color: Colors.yellow,
-        height: MediaQuery.of(context).size.height * 0.17,
-        alignment: Alignment.topCenter,
-        child: Stack(clipBehavior: Clip.none, children: [
-          Positioned(
-            top: 60,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.black,
-              ),
-              height: 70,
-              width: MediaQuery.of(context).size.width * 0.88,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 5,
-                          backgroundColor: Colors.orange,
-                        ),
-                        SizedBox(
-                          width: 25,
-                        ),
-                        Text(
-                          '${set_count} sets',
-                          style: TextStyles.mont_regular(
-                              color: Colors.white, fontSize: 12),
-                        ),
-                        SizedBox(
-                          width: 50,
-                        ),
-                        Text(
-                            (execution_type == 'Reps')
-                                ? '${reps} reps'
-                                : '${duration} ${duration_timetype}',
-                            style: TextStyles.mont_regular(
-                                color: Colors.white, fontSize: 12)),
-                      ],
-                    )
-                  ]),
-            ),
-          ),
-          Container(
-            // padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            height: 90,
-            width: MediaQuery.of(context).size.width * 0.88,
-            decoration: BoxDecoration(
-                color: lighterGray, borderRadius: BorderRadius.circular(15)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: EdgeInsets.only(left: 20, top: 15),
-                  // color: Colors.blue,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${exerciseName}',
-                        style: TextStyles.mont_bold(
-                            color: Colors.white, fontSize: 13),
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Text(
-                        'Mid-Set Rest: ${mid_set_rest} ${mid_set_rest_timetype}',
-                        style: TextStyles.mont_regular(
-                            color: Colors.grey, fontSize: 12),
-                      )
-                    ],
-                  ),
+        margin: EdgeInsets.only(left: 20, right: 20),
+        height: MediaQuery.of(context).size.height * 0.18,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.black,
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              flex: 70,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: lighterGray,
                 ),
-                ClipRRect(
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(15),
-                      bottomRight: Radius.circular(15)),
-                  child: Container(
-                    height: 90,
-                    width: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                      flex: 96,
+                      child: Container(
+                        padding: EdgeInsets.only(top: 13, left: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${exerciseName}',
+                              style: TextStyles.mont_bold(
+                                  color: Colors.white, fontSize: 13),
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Text(
+                              'Mid-Set Rest: ${mid_set_rest} ${mid_set_rest_timetype}',
+                              style: TextStyles.mont_regular(
+                                  color: Colors.grey, fontSize: 12),
+                            )
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                )
-              ],
+                    Expanded(
+                      flex: 4,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(15),
+                                bottomRight: Radius.circular(15))),
+                      ),
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
-        ]),
+            Expanded(
+              flex: 30,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 5,
+                      backgroundColor: Colors.orange,
+                    ),
+                    SizedBox(
+                      width: 25,
+                    ),
+                    Text(
+                      '${set_count} sets',
+                      style: TextStyles.mont_regular(
+                          color: Colors.white, fontSize: 12),
+                    ),
+                    SizedBox(
+                      width: 50,
+                    ),
+                    Text(
+                        (execution_type == 'Reps')
+                            ? '${reps} reps'
+                            : '${duration} ${duration_timetype}',
+                        style: TextStyles.mont_regular(
+                            color: Colors.white, fontSize: 12)),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
